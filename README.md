@@ -4,6 +4,8 @@ An **Open Agentic Web Challenge** submission: an open, publicly discoverable age
 
 > **Your data never leaves your browser.** All analysis runs locally; only anonymized, aggregated statistics are sent to the LLM you configure (BYOK).
 
+> 🌏 [中文文档](README_ZH.md)
+
 ## What it demonstrates
 
 - **Public agent discovery** — agents are declared in static JSON files under `/.well-known/`, not hardcoded in the UI. Any third-party runtime can fetch and call them.
