@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.env
+.env.local
+.env.*.local
+*.log
+.DS_Store
+
+# Apple Health 原始导出（敏感，永不入库）
+data/*.xml
+data/*.zip
+
+# 个人真实健康数据（匿名化但仍是真实生活轨迹，永不入库；
+# 仓库携带 src/data/healthData.sample.json 合成样例，格式见 siteState.ts）
+src/data/healthData.local.json

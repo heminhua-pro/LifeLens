@@ -1,0 +1,66 @@
+/* LifeLens 主题变量：light = 极光渐变风(B)，dark = 暗夜玻璃拟态(A) */
+
+:root,
+[data-theme='light'] {
+  --bg: #ffffff;
+  --panel: rgba(255, 255, 255, 0.72);
+  --card: #ffffff;
+  --border: #d9dcef;
+  --border-strong: #c7cbf0;
+  --text: #1f2329;
+  --muted: #8b90a0;
+  --accent: #7c6cff;
+  --accent-text: #4f46c8;
+  --accent-soft: #eef0fe;
+  --hover: #f2f3fb;
+  --chip: #f2f3fb;
+  --user-bubble: #7c6cff;
+  --user-text: #ffffff;
+  --bot-bubble: #ffffff;
+  --chart-grid: #e6e8f4;
+  --glow-1: rgba(165, 180, 252, 0.4);
+  --glow-2: rgba(153, 246, 228, 0.45);
+  --glow-3: rgba(196, 181, 253, 0.3);
+  --shadow: 0 4px 16px rgba(60, 60, 120, 0.08);
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --bg: #1e1e1e;
+  --panel: rgba(20, 22, 31, 0.82);
+  --card: #1a1d29;
+  --border: #47506e;
+  --border-strong: #5c658a;
+  --text: #ffffff;
+  --muted: #a8b3c4;
+  --accent: #7c6cff;
+  --accent-text: #c4b5fd;
+  --accent-soft: rgba(124, 108, 255, 0.18);
+  --hover: #1f2230;
+  --chip: #1f2230;
+  --user-bubble: #7c6cff;
+  --user-text: #ffffff;
+  --bot-bubble: #1a1d29;
+  --chart-grid: #262b3a;
+  --glow-1: rgba(124, 108, 255, 0.14);
+  --glow-2: rgba(34, 211, 238, 0.1);
+  --glow-3: rgba(124, 108, 255, 0.08);
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  color-scheme: dark;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+.ant-layout{
+  background-color: var(--bg);
+}

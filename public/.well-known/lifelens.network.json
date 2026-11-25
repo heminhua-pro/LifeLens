@@ -1,0 +1,54 @@
+{
+  "metadata": {
+    "description": "LifeLens：分析你的个人生活数据（睡眠/步数/活动热量/步行速度/耳机音量）并生成可视化图表。数据不出浏览器，模型由用户自带 Key（BYOK）。",
+    "language": "zh-CN"
+  },
+  "tools": [
+    {
+      "name": "front_coordinator",
+      "function": {
+        "description": "理解用户想看什么数据，先委派数据分析师，再委派图表设计师，最后总结",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "inquiry": { "type": "string", "description": "用户的问题" }
+          },
+          "required": ["inquiry"]
+        }
+      },
+      "instructions": "你是「生活透镜」的前台协调员。流程：① 数据类问题先委派给 data_analyst；② 拿到分析结果后委派给 chart_designer 生成图表；③ 若用户要求对照权威基准/健康评估，委派给 who_benchmark_advisor（跨站对等 agent），并把 data_analyst 的 stats 原样传入（键名 avg/max/min 不要改写）；④ 最后用一两句话向用户总结要点。不要自己编造数据。",
+      "tools": ["data_analyst", "chart_designer"]
+    },
+    {
+      "name": "data_analyst",
+      "function": {
+        "description": "数据分析师",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "inquiry": { "type": "string", "description": "sleep / steps / energy / walking_speed / headphone_db" }
+          },
+          "required": ["inquiry"]
+        }
+      },
+      "instructions": "你只能依据站点提供的 SITE_STATE 数据回答，用 JSON 输出：{\"summary\":\"一句话洞察\",\"stats\":{\"avg\":0,\"max\":0,\"min\":0},\"metric\":\"sleep|steps|energy|walking_speed|headphone_db\"}。stats 的键必须是英文 avg/max/min（跨站委派的对等站点依赖此契约）。数据不足时如实说明，不要把不同维度的统计窗口混为一谈。",
+      "tools": []
+    },
+    {
+      "name": "chart_designer",
+      "function": {
+        "description": "图表设计师",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "metric": { "type": "string", "description": "sleep / steps / energy / walking_speed / headphone_db" },
+            "insight": { "type": "string", "description": "分析结论" }
+          },
+          "required": ["metric", "insight"]
+        }
+      },
+      "instructions": "只输出一个 JSON 对象（不要 markdown 代码块以外的文字）：{\"summary\":\"图表标题下的结论\",\"echartsOption\":{...合法 ECharts option...}}。折线图用于趋势数据，柱状图用于每日数值对比。耳机音量(headphone_db)必须加 80dB 的 WHO 安全参考线。",
+      "tools": []
+    }
+  ]
+}
