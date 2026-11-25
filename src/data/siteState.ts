@@ -12,7 +12,8 @@ import health from '@health-data'
 
 const N = 30
 type Pt = { date: string; hours?: number; steps?: number; kcal?: number; mps?: number; db?: number }
-const arr = (key: keyof Pt) => (health as unknown as Record<string, Pt[]>)[key] as Pt[]
+type DataKey = 'sleep' | 'steps' | 'energy' | 'walkingSpeed' | 'headphoneDb'
+const arr = (key: DataKey) => (health as unknown as Record<DataKey, Pt[]>)[key]
 
 const sleepAll = arr('sleep')
 const stepsAll = arr('steps')

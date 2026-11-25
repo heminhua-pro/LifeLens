@@ -9,6 +9,7 @@ export interface Msg {
   kind: 'user' | 'bot' | 'trace'
   who?: string
   text?: string
+  html?: string
   chart?: ChartResult
 }
 
