@@ -16,6 +16,9 @@ function toggle(key: 'internal' | 'peers') {
   open[key] = !open[key]
 }
 
+/* URL 常量放 script：vue-tsc 3.3.14 的模板 codegen 对含 // 的字符串有转义 bug（vuejs/language-tools#6322） */
+const urlHint = 'https://example.com/.well-known/agent-manifest.json'
+
 /* 对等站点父子两级：站点行点击 = 未批准时批准 / 已批准时折叠其智能体 */
 const openPeers = reactive<Record<string, boolean>>({})
 function peerOpen(label: string) {
@@ -109,7 +112,7 @@ function submitAdd() {
       <div class="field-label">{{ t('fieldPeerName') }}</div>
       <a-input v-model:value="addForm.label" placeholder="health_hub" />
       <div class="field-label">Manifest URL</div>
-      <a-input v-model:value="addForm.url" placeholder="https://example.com/.well-known/agent-manifest.json" />
+      <a-input v-model:value="addForm.url" :placeholder="urlHint" />
       <div v-if="addErr" class="add-err">{{ addErr }}</div>
       <div class="add-tip">{{ t('peerAgentsHint') }}</div>
     </a-modal>

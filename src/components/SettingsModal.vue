@@ -4,6 +4,8 @@ import { store, applySettings } from '../store'
 import { t } from '../theme'
 
 const form = reactive({ base: '', key: '', model: '' })
+/* URL 常量放 script：vue-tsc 3.3.14 的模板 codegen 对含 // 的字符串有转义 bug（vuejs/language-tools#6322） */
+const apiHint = 'https://api.deepseek.com'
 
 watch(
   () => store.showSettings,
@@ -27,7 +29,7 @@ watch(
     :cancel-text="t('btnCancel')"
   >
     <div class="field-label">{{ t('fieldBase') }}</div>
-    <a-input v-model:value="form.base" placeholder="https://api.deepseek.com" />
+    <a-input v-model:value="form.base" :placeholder="apiHint" />
     <div class="field-label">{{ t('fieldKey') }}</div>
     <a-input-password v-model:value="form.key" placeholder="sk-..." />
     <div class="field-label">{{ t('fieldModel') }}</div>

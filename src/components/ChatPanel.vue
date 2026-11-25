@@ -6,9 +6,9 @@ import ChartCard from './ChartCard.vue'
 
 const input = ref('')
 
-function onSend(e?: KeyboardEvent) {
-  // Shift+Enter 换行，Enter 发送
-  if (e && (e as KeyboardEvent).shiftKey) return
+function onSend(e?: Event) {
+  // Shift+Enter 换行，Enter 发送；点击按钮时 e 是 MouseEvent（无 shiftKey，直接发送）
+  if (e && 'shiftKey' in e && (e as KeyboardEvent).shiftKey) return
   const text = input.value.trim()
   if (!text) return
   input.value = ''
