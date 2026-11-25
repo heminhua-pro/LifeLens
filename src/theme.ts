@@ -85,6 +85,11 @@ const dict = {
   btnDelete: { zh: '删除', en: 'Delete' },
   btnSave: { zh: '保存', en: 'Save' },
   btnCancel: { zh: '取消', en: 'Cancel' },
+  btnClearCfg: { zh: '清除配置', en: 'Clear profile' },
+  clearCfgTip: {
+    zh: '删除本地保存的 LLM 配置（含 Key），删除后回到 Mock 模式。规范要求：用户必须能删除已存配置。',
+    en: 'Delete the locally stored LLM profile (including the key); the app returns to Mock mode. Spec requirement: the user must be able to delete stored profiles.'
+  },
   formCall: { zh: '调用 ', en: 'Call ' },
   execute: { zh: '执行', en: 'Run' }
 } as const

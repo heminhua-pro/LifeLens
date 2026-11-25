@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { reactive, watch } from 'vue'
-import { store, applySettings } from '../store'
+import { store, applySettings, clearCfg } from '../store'
 import { t } from '../theme'
 
 const form = reactive({ base: '', key: '', model: '' })
@@ -17,6 +17,12 @@ watch(
     }
   }
 )
+/** 清除已存配置：删 localStorage 里的 BYOK 配置，关弹窗回到 Mock 模式 */
+function onClear() {
+  clearCfg()
+  form.base = ''; form.key = ''; form.model = ''
+  store.showSettings = false
+}
 </script>
 
 <template>
@@ -35,10 +41,16 @@ watch(
     <div class="field-label">{{ t('fieldModel') }}</div>
     <a-input v-model:value="form.model" placeholder="deepseek-chat / gpt-4o-mini / ..." />
     <div class="tip">{{ t('settingsTip') }}</div>
+    <div class="danger-row">
+      <a-popconfirm :title="t('clearCfgTip')" @confirm="onClear">
+        <a-button danger size="small">{{ t('btnClearCfg') }}</a-button>
+      </a-popconfirm>
+    </div>
   </a-modal>
 </template>
 
 <style scoped>
 .field-label { font-size: 12px; color: var(--muted); margin: 10px 0 4px; }
 .tip { font-size: 12px; color: var(--muted); margin-top: 10px; line-height: 1.6; }
+.danger-row { margin-top: 14px; border-top: 1px solid var(--muted); padding-top: 12px; }
 </style>

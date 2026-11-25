@@ -140,10 +140,9 @@ export async function approvePeer(label: string) {
     peer.approved = true
     pushMsg({ kind: 'trace', html: `已批准跨站加载 <b>${label}</b>，可用 agent：${Object.keys(peer.agents).join('、')}` })
   } catch (e) {
-    // 开发环境 peer 是示例域名，允许批准但不解析
-    peer.approved = true
+    // fail closed：加载失败保持未批准，能力不可用要明确上报（MVP 规范要求）
     peer.error = (e as Error).message
-    pushMsg({ kind: 'trace', html: `已批准 <b>${label}</b>，但对方站点暂不可达：${peer.error}（正式部署后可加载）` })
+    pushMsg({ kind: 'trace', html: `❌ <b>${label}</b> 加载失败，已保持未批准：${peer.error}（对方站点需部署到公网后重试）` })
   }
 }
 function safeHost(url: string): string {
@@ -200,4 +199,10 @@ export function applySettings(cfg: { base: string; key: string; model: string })
   saveCfg(store.cfg)
   store.showSettings = false
   pushMsg({ kind: 'trace', html: '配置已保存到 localStorage（Key 不进代码、不进产物 ✅）' })
+}
+/** 清除已存的 BYOK 配置（规范 MUST：user must be able to delete stored profiles） */
+export function clearCfg() {
+  try { localStorage.removeItem('oawc_cfg') } catch { /* ignore */ }
+  store.cfg = { base: '', key: '', model: '' }
+  pushMsg({ kind: 'trace', html: '已清除本地 LLM 配置（回到 Mock 模式；Key 已从本机删除）' })
 }
