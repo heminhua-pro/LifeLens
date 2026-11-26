@@ -3,9 +3,9 @@
   "front_man": "front_coordinator",
   "hocon": "lifelens.network.json",
   "peer-link": {
-    "health_hub": "http://localhost:5188/.well-known/agent-manifest.json"
+    "health_hub": "https://heminhua-pro.github.io/health-hub-peer/.well-known/agent-manifest.json"
   },
   "peer-policy": {
-    "allow": ["http://localhost:5188"]
+    "allow": ["https://heminhua-pro.github.io/health-hub-peer"]
   }
 }
