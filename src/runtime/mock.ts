@@ -70,7 +70,7 @@ function mockAnalyst(inquiry: string): string {
 
   if (inquiry.includes('睡眠'))
     return JSON.stringify({
-      summary: `${SITE_STATE.month} 平均睡眠 ${s.avg} 小时（${f1(s.min)}~${f1(s.max)}h），${volatility(SITE_STATE.sleep)}，${trendWord(SITE_STATE.sleep)}；${+s.avg >= 7 ? '达到 7 小时建议线' : '低于 7 小时建议线'}`,
+      summary: `${SITE_STATE.windowSleep} 平均睡眠 ${s.avg} 小时（${f1(s.min)}~${f1(s.max)}h），${volatility(SITE_STATE.sleep)}，${trendWord(SITE_STATE.sleep)}；${+s.avg >= 7 ? '达到 7 小时建议线' : '低于 7 小时建议线'}${SITE_STATE.sleepSampled ? `（${SITE_STATE.sleepSampled}）` : ''}`,
       stats: s,
       metric: 'sleep'
     })
@@ -80,25 +80,25 @@ function mockAnalyst(inquiry: string): string {
       ? `，与步数呈${r > 0 ? '正' : '负'}相关（r=${f1(r)}）`
       : ''
     return JSON.stringify({
-      summary: `日均活动消耗 ${en.avg} kcal，最高的一天达到 ${f1(en.max)} kcal，${trendWord(SITE_STATE.energy)}${cross}`,
+      summary: `${SITE_STATE.windowEnergy} 平均每日活动消耗 ${en.avg} kcal，最高的一天达到 ${f1(en.max)} kcal，${trendWord(SITE_STATE.energy)}${cross}${SITE_STATE.energySampled ? `（${SITE_STATE.energySampled}）` : ''}`,
       stats: en, metric: 'energy'
     })
   }
   if (inquiry.includes('耳机') || inquiry.includes('音量')) {
     const over = SITE_STATE.headphoneDb.filter(v => v >= 80).length
     return JSON.stringify({
-      summary: `日均耳机音量暴露 ${db.avg} dB，最高 ${f1(db.max)} dB，${over ? `有 ${over} 天达到或超过 WHO 80dB 安全线` : '无一天超过 WHO 80dB 安全线'}，${trendWord(SITE_STATE.headphoneDb)}`,
+      summary: `${SITE_STATE.windowHeadphoneDb} 日均耳机音量暴露 ${db.avg} dB，最高 ${f1(db.max)} dB，${over ? `有 ${over} 天达到或超过 WHO 80dB 安全线` : '无一天超过 WHO 80dB 安全线'}，${trendWord(SITE_STATE.headphoneDb)}${SITE_STATE.headphoneDbSampled ? `（${SITE_STATE.headphoneDbSampled}）` : ''}`,
       stats: db, metric: 'headphone_db'
     })
   }
   if (inquiry.includes('步速') || inquiry.includes('走路'))
     return JSON.stringify({
-      summary: `平均步行速度 ${ws.avg} m/s（${f1(ws.min)}~${f1(ws.max)} m/s），${volatility(SITE_STATE.walkingSpeed)}，${trendWord(SITE_STATE.walkingSpeed)}；含跑步等运动样本，数值高于纯步行`,
+      summary: `${SITE_STATE.windowWalkingSpeed} 平均步行速度 ${ws.avg} m/s（${f1(ws.min)}~${f1(ws.max)} m/s），${volatility(SITE_STATE.walkingSpeed)}，${trendWord(SITE_STATE.walkingSpeed)}；含跑步等运动样本，数值高于纯步行${SITE_STATE.walkingSpeedSampled ? `（${SITE_STATE.walkingSpeedSampled}）` : ''}`,
       stats: ws, metric: 'walking_speed'
     })
   const gap = weekendGap(SITE_STATE.stepsDates, SITE_STATE.steps)
   return JSON.stringify({
-    summary: `日均步数 ${st.avg}，最高 ${st.max} 步，${trendWord(SITE_STATE.steps)}${gap ? '，' + gap : ''}`,
+    summary: `${SITE_STATE.windowSteps} 日均步数 ${st.avg}，最高 ${st.max} 步，${trendWord(SITE_STATE.steps)}${gap ? '，' + gap : ''}${SITE_STATE.stepsSampled ? `（${SITE_STATE.stepsSampled}）` : ''}`,
     stats: st, metric: 'steps'
   })
 }

@@ -8,10 +8,10 @@ export type TraceFn = (html: string) => void
 export function systemFor(agent: AgentDef): string {
   let s = agent.instructions
   if (agent.name === 'data_analyst' || agent.name === 'chart_designer')
-    // 数据只注入提示词、不出浏览器；chart_designer 必须用真实数据点出图，禁止编造
+    // 全量站点数据只注入提示词、不出浏览器；禁止模型编造或增删数据点
     s += '\n站点数据(JSON)：' + JSON.stringify(SITE_STATE)
   if (agent.name === 'chart_designer')
-    s += '\n图表的 x 轴/数据系列必须使用上面站点数据中的真实数值（如 sleep 数组的全部数据点），禁止编造或抽样减少数据点。'
+    s += '\n图表的 x 轴/数据系列必须使用上面站点数据中的全部数据点（站点已控制注入体积；若某维度带 sampled 抽样标注，图表须照实呈现），禁止编造、增加或删减数据点；数据点较多时坐标轴标签稀疏显示（axisLabel interval）以免重叠。'
   if (agent.name === 'chart_designer')
     s += '\n配色使用 #7c6cff 为主色调，坐标轴文字 #8b90a0。'
   return s
