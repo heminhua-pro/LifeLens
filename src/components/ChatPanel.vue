@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { store, send } from '../store'
 import { t } from '../theme'
 import ChartCard from './ChartCard.vue'
+import { renderMd } from '../runtime/md'
 
 const input = ref('')
 
@@ -49,7 +50,7 @@ function followUps() {
       </div>
       <div v-else class="msg bot">
         <div v-if="m.who" class="who">{{ m.who }}</div>
-        <div v-if="m.text" class="bot-text">{{ m.text }}</div>
+        <div v-if="m.text" class="bot-text md-body" v-html="renderMd(m.text)"></div>
         <ChartCard v-if="m.chart" :chart="m.chart" />
         <div v-if="m.id === lastBotId() && !store.loading" class="followups">
           <button v-for="s in followUps()" :key="s" class="follow-chip" @click="sug(s)">{{ s }}</button>
@@ -89,6 +90,20 @@ function followUps() {
 .chat { flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 12px; scrollbar-width: none; }
 .chat::-webkit-scrollbar { display: none; }
 .msg { max-width: 72%; padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.6; white-space: pre-wrap; transition: background .25s ease; }
+.msg.bot .md-body { white-space: normal; }
+/* markdown 基础排版（LLM 回复） */
+.md-body :deep(p) { margin: 0 0 8px; }
+.md-body :deep(p:last-child) { margin-bottom: 0; }
+.md-body :deep(ul), .md-body :deep(ol) { margin: 4px 0 8px; padding-left: 20px; }
+.md-body :deep(li) { margin: 2px 0; }
+.md-body :deep(strong) { font-weight: 600; }
+.md-body :deep(code) { background: rgba(124,108,255,.1); border-radius: 4px; padding: 1px 5px; font-size: 13px; }
+.md-body :deep(pre) { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px; overflow-x: auto; margin: 8px 0; }
+.md-body :deep(pre code) { background: none; padding: 0; }
+.md-body :deep(a) { color: var(--accent-text); }
+.md-body :deep(h1), .md-body :deep(h2), .md-body :deep(h3) { font-size: 15px; margin: 10px 0 6px; }
+.md-body :deep(table) { border-collapse: collapse; margin: 8px 0; font-size: 13px; }
+.md-body :deep(th), .md-body :deep(td) { border: 1px solid var(--border-strong); padding: 4px 8px; }
 .msg.user { align-self: flex-end; background: var(--user-bubble); color: var(--user-text); border-bottom-right-radius: 4px; }
 .msg.bot { align-self: flex-start; background: var(--bot-bubble); border: 1px solid var(--border); border-bottom-left-radius: 4px; color: var(--text); }
 .msg .who { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
