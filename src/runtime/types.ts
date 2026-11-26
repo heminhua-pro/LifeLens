@@ -2,7 +2,7 @@
 
 export interface ParamSchema {
   type: string
-  properties?: Record<string, { type: string; description?: string }>
+  properties?: Record<string, { type: string; description?: string; enum?: string[]; enumLabels?: Record<string, string> }>
   required?: string[]
 }
 
