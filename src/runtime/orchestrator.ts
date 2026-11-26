@@ -2,6 +2,7 @@ import type { AgentDef, ChartResult, ChatMessage, LlmTool } from './types'
 import { callLLM } from './llm'
 import { loadCfg } from './config'
 import { SITE_STATE } from '../data/siteState'
+import { SITE_ACTIONS, actionConfirmDetail, isActionTool } from './actions'
 
 export type TraceFn = (html: string) => void
 
@@ -40,6 +41,12 @@ export interface AgentRunResult {
   chart: ChartResult | null
 }
 
+/** 站点动作上下文：确认弹窗与实际执行由 store 注入，保持 runtime 与 UI 解耦 */
+export interface ActionContext {
+  confirm: (title: string, detail: string) => Promise<boolean>
+  execute: (name: string, args: Record<string, unknown>) => Promise<string>
+}
+
 /**
  * 核心委派循环：
  * agent.tools 声明的下游 + （仅入口 agent）已批准的对等 agent，
@@ -51,7 +58,8 @@ export async function runAgent(
   agentName: string,
   params: Record<string, unknown>,
   trace: TraceFn,
-  depth = 0
+  depth = 0,
+  actions?: ActionContext
 ): Promise<AgentRunResult> {
   const agent = agents[agentName] || peerAgents[agentName]
   if (!agent) throw new Error(`未找到 agent: ${agentName}`)
@@ -75,6 +83,19 @@ export async function runAgent(
         }
       }
     })
+  // 站点动作（grounded capability）：agent.actions 声明的动作转为 LLM tool
+  for (const name of (agent.actions || [])) {
+    const def = SITE_ACTIONS[name]
+    if (!def) continue
+    llmTools.push({
+      type: 'function' as const,
+      function: {
+        name: 'action_' + name,
+        description: def.description,
+        parameters: def.parameters
+      }
+    })
+  }
   // 入口 agent 额外暴露已批准的 peer agents（跨站委派）
   if (depth === 0) {
     for (const name of Object.keys(peerAgents)) {
@@ -98,13 +119,38 @@ export async function runAgent(
       messages.push({ role: 'assistant', content: reply.content || '', tool_calls: reply.tool_calls })
       for (const tc of reply.tool_calls) {
         const fn = tc.function.name
+        let args: Record<string, unknown> = {}
+        try { args = JSON.parse(tc.function.arguments || '{}') } catch { /* ignore */ }
+
+        // 站点动作：先摊开参数让用户确认，获同意后才执行（浏览器是权限守门员）
+        if (isActionTool(fn)) {
+          const name = fn.slice('action_'.length)
+          if (!SITE_ACTIONS[name]) continue
+          const { title, detail } = actionConfirmDetail(name, args)
+          trace(`站点动作请求 <b>${name}</b>，等待用户确认`)
+          const ok = actions ? await actions.confirm(title, detail) : false
+          if (!ok) {
+            trace(`❌ 用户取消了站点动作 <b>${name}</b>（未执行任何写操作）`)
+            messages.push({ role: 'tool', tool_call_id: tc.id, content: '用户取消了操作，未执行。' })
+            continue
+          }
+          let result: string
+          try {
+            result = actions ? await actions.execute(name, args) : '(未配置动作执行器)'
+            trace(`✅ 用户已确认执行站点动作 <b>${name}</b>`)
+          } catch (e) {
+            result = `执行失败：${(e as Error).message}`
+            trace(`❌ 站点动作 <b>${name}</b> 执行失败：${(e as Error).message}`)
+          }
+          messages.push({ role: 'tool', tool_call_id: tc.id, content: result })
+          continue
+        }
+
         if (!fn.startsWith('delegate_')) continue
         const sub = fn.slice('delegate_'.length)
         if (!agents[sub] && !peerAgents[sub]) continue
-        let args: Record<string, unknown> = {}
-        try { args = JSON.parse(tc.function.arguments || '{}') } catch { /* ignore */ }
         trace(`委派 <b>${agentName}</b> → <b>${sub}</b>${peerAgents[sub] && !agents[sub] ? '（跨站）' : ''}`)
-        const subResult = await runAgent(agents, peerAgents, sub, args, trace, depth + 1)
+        const subResult = await runAgent(agents, peerAgents, sub, args, trace, depth + 1, actions)
         if (subResult.chart) bubbledChart = subResult.chart
         messages.push({ role: 'tool', tool_call_id: tc.id, content: String(subResult.content).slice(0, 4000) })
       }

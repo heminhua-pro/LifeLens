@@ -51,7 +51,7 @@ function followUps() {
       <div v-else class="msg bot">
         <div v-if="m.who" class="who">{{ m.who }}</div>
         <div v-if="m.text" class="bot-text md-body" v-html="renderMd(m.text)"></div>
-        <ChartCard v-if="m.chart" :chart="m.chart" />
+        <ChartCard v-if="m.chart" :chart="m.chart" :md-text="m.text" />
         <div v-if="m.id === lastBotId() && !store.loading" class="followups">
           <button v-for="s in followUps()" :key="s" class="follow-chip" @click="sug(s)">{{ s }}</button>
         </div>

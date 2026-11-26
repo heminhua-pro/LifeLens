@@ -24,12 +24,26 @@ export async function loadManifest(): Promise<{ manifest: Manifest; url: string 
  * 相对文件名（如 lifelens.network.json）与绝对 URL 都支持。
  * 不允许直接用页面路径解析——子路径部署（/LifeLens/）下会 404。
  */
+/**
+ * network 校验：tools 非空、agent 名称不重复、front_man 必须在 tools 中定义。
+ * 校验失败直接抛错，阻止带病清单进入运行时（静默覆盖会掩盖发布错误）。
+ */
+export function validateNetwork(network: Network, frontMan?: string): void {
+  if (!network.tools?.length) throw new Error('network.tools 为空')
+  if (network.tools.some(t => !t.name)) throw new Error('network.tools 存在缺少 name 的 agent')
+  const names = network.tools.map(t => t.name)
+  const dupes = [...new Set(names.filter((n, i) => names.indexOf(n) !== i))]
+  if (dupes.length) throw new Error(`network.tools 存在重复的 agent 名称：${dupes.join('、')}`)
+  if (frontMan !== undefined && !names.includes(frontMan))
+    throw new Error(`front_man「${frontMan}」未在 network.tools 中定义`)
+}
+
 export async function loadNetwork(manifest: Manifest, manifestUrl?: string): Promise<Network> {
   const base = manifestUrl ?? new URL(`${wellKnownBase()}agent-manifest.json`, location.href).href
   const res = await fetch(new URL(manifest.hocon, base).href)
   if (!res.ok) throw new Error(`network 定义加载失败 (${res.status})`)
   const network: Network = await res.json()
-  if (!network.tools?.length) throw new Error('network.tools 为空')
+  validateNetwork(network, manifest.front_man)
   return network
 }
 
@@ -42,6 +56,7 @@ export async function loadPeer(peerUrl: string): Promise<Record<string, AgentDef
   const netRes = await fetch(new URL(peerManifest.hocon, peerUrl).href)
   if (!netRes.ok) throw new Error(`peer network 加载失败 (${netRes.status})`)
   const peerNetwork: Network = await netRes.json()
+  validateNetwork(peerNetwork, peerManifest.front_man)
   const agents: Record<string, AgentDef> = {}
   peerNetwork.tools.forEach(t => (agents[t.name] = t))
   return agents

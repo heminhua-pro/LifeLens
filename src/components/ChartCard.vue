@@ -7,10 +7,11 @@ import { CanvasRenderer } from 'echarts/renderers'
 import type { ChartResult } from '../runtime/types'
 import { ui, t } from '../theme'
 
+const props = defineProps<{ chart: ChartResult; mdText?: string }>()
+
 // 按需注册：折线 / 柱状 / 饼图 + 网格 / 提示框 / 图例 / 参考线
 echarts.use([LineChart, BarChart, PieChart, GridComponent, TooltipComponent, LegendComponent, MarkLineComponent, CanvasRenderer, TitleComponent])
 
-const props = defineProps<{ chart: ChartResult }>()
 const box = ref<HTMLDivElement>()
 let inst: echarts.ECharts | null = null
 let ro: ResizeObserver | null = null
@@ -94,6 +95,26 @@ function downloadChart() {
   a.download = (props.chart.summary || 'chart').replace(/[\\/:*?"<>|\s]+/g, '_').slice(0, 40) + '.png'
   a.click()
 }
+
+/** 导出 Markdown：气泡正文逐字保留 + 顶部内嵌当前图表的 PNG（与页面所见一致） */
+function downloadMd() {
+  if (!props.mdText && !inst) return
+  // 用当前已渲染实例出图，白底保证在任何 Markdown 阅读器里都清晰
+  const png = inst?.getDataURL({ type: 'png', pixelRatio: 2, backgroundColor: '#ffffff' })
+  const img = png
+    ? `![${props.chart.summary || '趋势图'}](data:image/png;base64,${png.replace(/^data:image\/png;base64,/, '')})\n\n`
+    : ''
+  const body = img + (props.mdText || '')
+  const blob = new Blob([body], { type: 'text/markdown;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = (props.chart.summary || 'analysis').replace(/[\\/:*?"<>|\s]+/g, '_').slice(0, 40) + '.md'
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
 watch(() => props.chart, c => apply(c))
 watch(() => ui.mode, () => apply(props.chart))
 onBeforeUnmount(() => {
@@ -108,6 +129,7 @@ onBeforeUnmount(() => {
     <div ref="box" class="chart-box"></div>
     <div class="chart-actions">
       <a-button @click="downloadChart">{{ t('download') }}</a-button>
+      <a-button v-if="mdText" @click="downloadMd" style="margin-left:8px">{{ t('downloadMd') }}</a-button>
     </div>
   </div>
 </template>

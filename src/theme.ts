@@ -47,6 +47,7 @@ const dict = {
   pending: { zh: '🔒 待批准', en: '🔒 pending' },
   peerSite: { zh: '对等站点', en: 'peer site' },
   download: { zh: '⬇ 下载图表 (PNG)', en: '⬇ Download chart (PNG)' },
+  downloadMd: { zh: '📝 导出 Markdown', en: '📝 Export Markdown' },
   emptyLine1: {
     zh: '左侧列表由 runtime 解析 agent-manifest.json 生成',
     en: 'The sidebar is parsed from agent-manifest.json by the runtime'
@@ -82,6 +83,7 @@ const dict = {
   fieldPeerName: { zh: '站点名称', en: 'Site name' },
   peerAdd: { zh: '添加', en: 'Add' },
   addPeerTitle: { zh: '添加对等站点', en: 'Add peer site' },
+  peerRemoveConfirm: { zh: '删除该对等站点？批准状态与缓存的能力清单会一并清除。', en: 'Remove this peer site? Its approval and cached agent list will be cleared.' },
   btnDelete: { zh: '删除', en: 'Delete' },
   btnSave: { zh: '保存', en: 'Save' },
   btnCancel: { zh: '取消', en: 'Cancel' },

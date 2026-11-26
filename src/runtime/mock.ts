@@ -188,6 +188,17 @@ function mockChart(metric: string, insight: string): string {
   })
 }
 
+/** 供站点动作(导出报告)复用：生成指定维度的分析结论，与对话中 data_analyst 输出一致 */
+export function analysisSummary(metric: string): string {
+  const key: Record<string, string> = { sleep: '睡眠', steps: '步数', energy: '热量', walking_speed: '步速', headphone_db: '耳机' }
+  try { return JSON.parse(mockAnalyst(key[metric] || '睡眠')).summary || '' } catch { return '' }
+}
+
+/** 供站点动作(导出报告)复用：生成指定维度的 ECharts option，与对话中图表一致 */
+export function chartOption(metric: string): Record<string, any> {
+  try { return JSON.parse(mockChart(metric, '')).echartsOption || {} } catch { return {} }
+}
+
 /**
  * Mock 模式：本地模拟完整委派链 + 真实计算，保证无 Key 也能演示全流程。
  * 通过 instructions 中的稳定关键词识别当前 agent（不依赖 description）。
@@ -200,7 +211,24 @@ export function mockLLM(messages: ChatMessage[], tools: LlmTool[]): { content?: 
   if (sys.includes('前台协调员')) {
     let inquiry = user
     try { inquiry = JSON.parse(user).inquiry || user } catch { /* ignore */ }
+    // 站点动作已在 toolResults 里返回 → 向用户确认执行结果
+    const actionMsg = toolResults.find(m => /保存到你的设备|未找到已生成的图表|未执行/.test(m.content))
+    if (actionMsg) {
+      const cancelled = /未执行/.test(actionMsg.content)
+      return { content: cancelled
+        ? '你取消了本次导出，站点没有执行任何写操作 ✅'
+        : `✅ ${actionMsg.content}\n\n（文件仅在浏览器本地生成，未上传；执行前已向你展示参数并获得确认。）` }
+    }
     if (!toolResults.length) {
+      // 导出意图：调用站点动作（Mock 也走完整的"参数确认 → 本地执行"链路）
+      if (tools.some(tool => tool.function.name === 'action_export_analysis') && /导出|下载|保存|export/i.test(inquiry)) {
+        const metric = /耳机|音量/.test(inquiry) ? 'headphone_db'
+          : /步速|走路|步行速度/.test(inquiry) ? 'walking_speed'
+          : /热量|卡路里|消耗/.test(inquiry) ? 'energy'
+          : /步数|走路步数/.test(inquiry) ? 'steps' : 'sleep'
+        const format = /png|图片|图表/i.test(inquiry) ? 'png' : 'md'
+        return { tool_calls: [{ id: 'm-act', function: { name: 'action_export_analysis', arguments: JSON.stringify({ metric, format }) } }] }
+      }
       // 跨站演示：用户点名 health_hub / WHO 基准时，委派对等智能体（需已批准，工具列表里才有）
       if (tools.some(tool => tool.function.name === 'delegate_who_benchmark_advisor') &&
           /health_hub|health hub|WHO|基准|健康评估/i.test(inquiry)) {

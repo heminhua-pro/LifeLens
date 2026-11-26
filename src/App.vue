@@ -69,12 +69,14 @@ const antdTheme = computed(() => ({
       :open="store.showConfirm"
       :title="'⚠️ ' + store.confirmTitle"
       :closable="false"
+      :mask-closable="false"
+      :keyboard="false"
       @cancel="resolveConfirm(false)"
     >
       <div class="confirm-detail">{{ store.confirmDetail }}</div>
       <template #footer>
-        <a-button @click="resolveConfirm(false)">{{ t('reject') }}</a-button>
-        <a-button danger type="primary" @click="resolveConfirm(true)">{{ t('confirm') }}</a-button>
+        <a-button :disabled="store.confirmLoading" @click="resolveConfirm(false)">{{ t('reject') }}</a-button>
+        <a-button danger type="primary" :loading="store.confirmLoading" @click="resolveConfirm(true)">{{ t('confirm') }}</a-button>
       </template>
     </a-modal>
   </a-config-provider>

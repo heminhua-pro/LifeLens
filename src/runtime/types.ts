@@ -14,6 +14,13 @@ export interface AgentDef {
   actions?: string[]
 }
 
+/** 站点动作（grounded capability）：agent 可调用、对外部环境产生实际效果的工具 */
+export interface ActionDef {
+  name: string
+  description: string
+  parameters: ParamSchema
+}
+
 export interface Network {
   metadata: { description: string }
   tools: AgentDef[]

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
-import { PlusOutlined } from '@ant-design/icons-vue'
-import { store, selectAgent, approvePeer, addPeer } from '../store'
+import { PlusOutlined, DeleteOutlined } from '@ant-design/icons-vue'
+import { store, selectAgent, approvePeer, addPeer, removePeer, customPeerLabels } from '../store'
 import { t } from '../theme'
 import type { AgentDef } from '../runtime/types'
 
@@ -47,6 +47,11 @@ function submitAdd() {
   const err = addPeer(addForm.label, addForm.url)
   addErr.value = err || ''
   if (!err) toggleAdd()
+}
+
+/* 删除对等站点：仅自定义站点可删（manifest 内置的重载后会回来），popconfirm 二次确认 */
+function isCustom(label: string) {
+  return customPeerLabels().includes(label)
 }
 </script>
 
@@ -125,6 +130,15 @@ function submitAdd() {
             <span class="lock">{{ t('pending') }}</span>
           </div>
           <div class="desc">{{ t('peerAgentsHint') }}</div>
+          <a-popconfirm
+            v-if="isCustom(p.label)"
+            :title="t('peerRemoveConfirm')"
+            :ok-text="t('btnDelete')"
+            :cancel-text="t('btnCancel')"
+            @confirm="removePeer(p.label)"
+          >
+            <DeleteOutlined class="row-del" :title="t('btnDelete')" @click.stop />
+          </a-popconfirm>
         </div>
         <!-- 已批准 + 仅一个智能体：站点名变小标签，agent 直接平铺（两级到底） -->
         <template v-else-if="peerAgents(p.label).length <= 1">
@@ -137,6 +151,15 @@ function submitAdd() {
           >
             <div class="name">{{ a.name }} <span class="peer-tag">{{ p.label }}</span></div>
             <div class="desc">{{ a.function.description }}</div>
+            <a-popconfirm
+              v-if="isCustom(p.label)"
+              :title="t('peerRemoveConfirm')"
+              :ok-text="t('btnDelete')"
+              :cancel-text="t('btnCancel')"
+              @confirm="removePeer(p.label)"
+            >
+              <DeleteOutlined class="row-del" :title="t('btnDelete')" @click.stop />
+            </a-popconfirm>
           </div>
         </template>
         <!-- 已批准 + 多个智能体：保留站点父行 + 缩进子行 -->
@@ -144,6 +167,15 @@ function submitAdd() {
           <div class="nav-item site" @click="peerToggle(p.label)">
             <div class="name">{{ p.label }}</div>
             <div class="desc">{{ p.url }}</div>
+            <a-popconfirm
+              v-if="isCustom(p.label)"
+              :title="t('peerRemoveConfirm')"
+              :ok-text="t('btnDelete')"
+              :cancel-text="t('btnCancel')"
+              @confirm="removePeer(p.label)"
+            >
+              <DeleteOutlined class="row-del shifted" :title="t('btnDelete')" @click.stop />
+            </a-popconfirm>
             <span class="chev small" :class="{ closed: !peerOpen(p.label) }"></span>
           </div>
           <template v-if="peerOpen(p.label)">
@@ -233,6 +265,17 @@ function submitAdd() {
   font-size: 12px; color: var(--accent-text); font-weight: 400;
   background: var(--accent-soft); border-radius: 6px; padding: 0 6px; margin-left: 2px;
 }
+
+/* 行内删除按钮：hover 行时浮现，红色提示危险操作 */
+.row-del {
+  position: absolute; right: 14px; top: 12px;
+  font-size: 12px; color: var(--muted);
+  opacity: 0; cursor: pointer;
+  transition: opacity .15s ease, color .15s ease;
+}
+.row-del.shifted { right: 32px; } /* 多智能体父行：避开右侧折叠箭头 */
+.nav-item:hover .row-del { opacity: 1; }
+.row-del:hover { color: #ef4444; }
 
 /* 对方的智能体：缩进子行 + 左侧引导线 */
 .nav-item.child { padding-left: 32px; }
