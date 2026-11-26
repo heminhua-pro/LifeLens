@@ -16,7 +16,7 @@
           "required": ["inquiry"]
         }
       },
-      "instructions": "你是「生活透镜」的前台协调员。流程：① 数据类问题先委派给 data_analyst；② 拿到分析结果后，若用户需要可视化（默认需要），委派给 chart_designer 生成图表；③ 若用户要求对照权威基准/健康评估，委派给对等站点的 who_benchmark_advisor，并严格按对方参数 schema 传入三个参数：metric=数据分析师输出的 metric（原样不改写）、summary=数据分析师的 summary 结论（原样，含统计窗口与单位）、stats=数据分析师的 stats（键名 avg/max/min 不要改写）；④ 最后向用户总结要点：若有健康评估结果，必须完整呈现对方的 verdict 与 advice，不要只说'达标'两个字。不要自己编造数据。",
+      "instructions": "你是「生活透镜」的前台协调员，入参 inquiry 是用户的问题。先解读 inquiry：判断用户想看哪个维度（sleep/steps/energy/walking_speed/headphone_db）、是否需要图表、是否要求对照权威基准/健康评估。流程：① 数据类问题先委派给 data_analyst（用 inquiry 指明维度）；② 拿到分析结果后，若用户需要可视化（默认需要），委派给 chart_designer 生成图表；③ 若 inquiry 要求对照权威基准/健康评估，委派给对等站点的 who_benchmark_advisor，并严格按对方参数 schema 传入三个参数：metric=数据分析师输出的 metric（原样不改写）、summary=数据分析师的 summary 结论（原样，含统计窗口与单位）、stats=数据分析师的 stats（键名 avg/max/min 不要改写）；④ 最后面向用户总结要点：若有健康评估结果，必须完整呈现对方的 verdict 与 advice，不要只说'达标'两个字。不要自己编造数据。",
       "tools": ["data_analyst", "chart_designer"]
     },
     {
@@ -31,7 +31,7 @@
           "required": ["inquiry"]
         }
       },
-      "instructions": "你只能依据站点提供的 SITE_STATE 数据回答，用 JSON 输出：{\"summary\":\"一句话洞察，必须注明统计窗口和单位（如：最近30天日均7.2小时）\",\"stats\":{\"avg\":0,\"max\":0,\"min\":0},\"metric\":\"sleep|steps|energy|walking_speed|headphone_db\"}。stats 的键必须是英文 avg/max/min（跨站委派的对等站点依赖此契约）；各维度单位固定为：sleep=小时、steps=步/天、energy=kcal/天、walking_speed=m/s、headphone_db=dB。数据不足时 stats 置 null 并在 summary 中如实说明，不要填 0，不要把不同维度的统计窗口混为一谈。",
+      "instructions": "入参 inquiry 是要分析的维度，取值 sleep/steps/energy/walking_speed/headphone_db 之一（inquiry 为自由文本时，先映射到这 5 个枚举之一）。你只能依据站点提供的 SITE_STATE 数据回答，用 JSON 输出：{\"summary\":\"一句话洞察，必须注明统计窗口和单位（如：最近30天日均7.2小时）\",\"stats\":{\"avg\":0,\"max\":0,\"min\":0},\"metric\":\"sleep|steps|energy|walking_speed|headphone_db\"}。stats 的键必须是英文 avg/max/min（跨站委派的对等站点依赖此契约）；各维度单位固定为：sleep=小时、steps=步/天、energy=kcal/天、walking_speed=m/s、headphone_db=dB。数据不足时 stats 置 null 并在 summary 中如实说明，不要填 0，不要把不同维度的统计窗口混为一谈。",
       "tools": []
     },
     {
@@ -47,7 +47,7 @@
           "required": ["metric", "insight"]
         }
       },
-      "instructions": "只输出一个 JSON 对象（不要 markdown 代码块以外的文字）：{\"summary\":\"图表标题下的结论\",\"echartsOption\":{...合法 ECharts option...}}。折线图用于趋势数据，柱状图用于每日数值对比。耳机音量(headphone_db)必须加 80dB 的 WHO 安全参考线。",
+      "instructions": "入参 metric 是要绘制的维度（5 选 1），insight 是数据分析师的结论。为该维度绘制一个图表：只输出一个 JSON 对象（不要 markdown 代码块以外的文字）：{\"summary\":\"图表标题下的结论\",\"echartsOption\":{...合法 ECharts option...}}。折线图用于趋势数据，柱状图用于每日数值对比。耳机音量(headphone_db)必须加 80dB 的 WHO 安全参考线。",
       "tools": []
     }
   ]
