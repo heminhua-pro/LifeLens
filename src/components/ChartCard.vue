@@ -117,7 +117,7 @@ onBeforeUnmount(() => {
   background: var(--card); border: 1px solid var(--border); border-radius: 12px;
   padding: 8px; margin-top: 8px; box-shadow: var(--shadow); transition: background .25s ease;
 }
-.chart-summary { font-size: 12px; color: var(--muted); padding: 4px 6px; }
+.chart-summary { font-size: 12px; color: var(--muted); padding: 4px 6px;margin-bottom: 16px; }
 .chart-box { width: 100%; height: 280px; }
 .chart-actions { padding: 4px 6px 2px; }
 </style>

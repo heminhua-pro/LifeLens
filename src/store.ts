@@ -94,9 +94,13 @@ async function execute(name: string, params: Record<string, unknown>, who: strin
     const ans = run.content
     // 图表优先取委派链冒泡结果，最终文本兜底扫描
     const chart = run.chart ?? extractChart(ans)
-    const text = chart
-      ? ans.replace(/```[\s\S]*?```/g, '').trim()
-      : ans
+    let text = ans.replace(/```[\s\S]*?```/g, '').trim()
+    if (chart) {
+      // 模型可能把图表 JSON 不带围栏地回显在正文里：删掉含 echartsOption 的 JSON 块；
+      // 剩余若仍是纯 JSON 残渣（无中文/正常句子），整体不显示（图表卡片自带 summary）
+      text = text.replace(/\{[\s\S]*?"echartsOption"[\s\S]*\}/g, '').trim()
+      if (!text || !/[^\s{}[\]":,0-9a-zA-Z_'".-]/.test(text)) text = ''
+    }
     pushMsg({ kind: 'bot', who, text: text || undefined, chart: chart || undefined })
   } catch (e) {
     pushMsg({ kind: 'bot', who: 'runtime', text: '❌ 出错：' + (e as Error).message + '（可在右上角检查 API 设置）' })

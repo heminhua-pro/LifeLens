@@ -89,7 +89,7 @@ function followUps() {
 <style scoped>
 .chat { flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 12px; scrollbar-width: none; }
 .chat::-webkit-scrollbar { display: none; }
-.msg { max-width: 72%; padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.6; white-space: pre-wrap; transition: background .25s ease; }
+.msg { max-width: 72%; padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; transition: background .25s ease; }
 .msg.bot .md-body { white-space: normal; }
 /* markdown 基础排版（LLM 回复） */
 .md-body :deep(p) { margin: 0 0 8px; }
