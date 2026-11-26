@@ -11,7 +11,7 @@
         "parameters": {
           "type": "object",
           "properties": {
-            "inquiry": { "type": "string", "description": "用户的问题" }
+            "inquiry": { "type": "string", "description": "用户的问题，如：最近我的睡眠怎么样？帮我看看耳机音量是否超标 / 分析一下步数趋势并对照 WHO 基准评估" }
           },
           "required": ["inquiry"]
         }
@@ -26,7 +26,7 @@
         "parameters": {
           "type": "object",
           "properties": {
-            "inquiry": { "type": "string", "description": "sleep / steps / energy / walking_speed / headphone_db" }
+            "inquiry": { "type": "string", "description": "要分析的维度：填 sleep（睡眠）/ steps（步数）/ energy（活动热量）/ walking_speed（步行速度）/ headphone_db（耳机音量）之一，也可用中文如'睡眠'" }
           },
           "required": ["inquiry"]
         }
@@ -41,8 +41,8 @@
         "parameters": {
           "type": "object",
           "properties": {
-            "metric": { "type": "string", "description": "sleep / steps / energy / walking_speed / headphone_db" },
-            "insight": { "type": "string", "description": "分析结论" }
+            "metric": { "type": "string", "description": "要绘制的维度：填 sleep（睡眠）/ steps（步数）/ energy（活动热量）/ walking_speed（步行速度）/ headphone_db（耳机音量）之一" },
+            "insight": { "type": "string", "description": "数据分析师的结论，如：2026-05-29~2026-11-24 日均睡眠 7.2 小时，总体平稳，达到建议线" }
           },
           "required": ["metric", "insight"]
         }
