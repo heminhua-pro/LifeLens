@@ -22,7 +22,10 @@ An **Open Agentic Web Challenge** submission: an open, publicly discoverable age
 | `*.network.json` with JSON Schema params | [`public/.well-known/lifelens.network.json`](public/.well-known/lifelens.network.json) |
 | Browser-provided runtime | [`src/runtime/`](src/runtime/) — manifest loader, orchestrator, LLM client |
 | ≥ 1 agent | 3 agents: `front_coordinator`, `data_analyst`, `chart_designer` |
-| Sensitive-action confirmation | Cross-origin peer approval cards; writes require explicit browser consent |
+| Manifest loading validation | `manifest.ts` `validateNetwork()`: non-empty tools, missing `name`, duplicate agent names, `front_man` existence — shared by `loadNetwork` / `loadPeer`, failures reject the load |
+| Sensitive-action confirmation | Cross-origin peer approval card and site-action card (confirm button shows loading, success/failure toasts); writes require explicit browser consent |
+| Site action (grounded capability) | `export_analysis`: exports the analysis as a Markdown report or PNG chart locally; runs only after consent |
+| Observable execution | In-chat trace card: delegation chain, argument summaries, per-request latency and total duration; traces never contain keys or credentials |
 | No credentials in shipped artifact | `.env.production` forces an empty key; verified by bundle scan |
 | Cross-site delegation | `peer-link` + `peer-policy`; approval-gated loading of peer manifests |
 
@@ -114,6 +117,8 @@ Deploy as a static site (Vercel / Cloudflare Pages / GitHub Pages all work). Ser
 ## Peer interop
 
 Point `peer-link` in your manifest at any other OAWC-compliant site's manifest to make its agents callable from here (after user approval). Peer agents are exposed to the entry agent as `delegate_<name>` tools automatically.
+
+- **Built-in demo**: the current `peer-link` points at `https://heminhua-pro.github.io/health-hub-peer/` — a publicly deployed Health Hub peer site (WHO benchmark advisor; standalone MIT-licensed source, deployable anywhere with the included zero-dependency `node server.js`).
 
 ## License
 

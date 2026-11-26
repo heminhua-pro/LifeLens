@@ -18,8 +18,10 @@
 ## 界面功能
 
 - **侧栏三层结构**：对话入口（front_coordinator）→ 内部协作者（data_analyst / chart_designer，默认收起）→ 对等站点（站点行 = 批准开关，批准后智能体平铺展示，带来源标签）
-- **添加对等站点**：侧栏「对等站点」旁的 ➕ 按钮，弹窗填站点名 + Manifest URL 即可接入任意符合协议的站点（存 localStorage，切换语言不丢失）
-- **对话式交互**：委派过程 trace 可见（含「跨站」标记）、图表气泡、跟进推荐问题 chips、图表一键下载 PNG（2 倍高清，背景随主题）
+- **添加 / 删除对等站点**：侧栏「对等站点」旁的 ➕ 按钮弹窗接入任意符合协议的站点（存 localStorage，切换语言不丢失）；自定义站点行 hover 出现删除按钮，二次确认后移除（manifest 内置站点不可删）
+- **执行轨迹卡片**：委派链、参数摘要、每次网络请求耗时聚合为一张可折叠卡片——执行中自动展开，完毕自动折叠并显示总耗时；trace 不输出 Key 等凭证
+- **站点动作导出**：`export_analysis` 把分析结论导出为 Markdown 报告或 PNG 图表（2 倍高清，背景随主题），参数确认后才写文件
+- **对话式交互**：图表气泡、跟进推荐问题 chips、AI 回复浅渐变气泡、双主题
 - **无 Key 演示**：内置完全本地的 Mock LLM，不需要任何 API Key 就能跑通完整委派链路
 
 ## OAWC MVP 规范符合性
@@ -30,7 +32,10 @@
 | 带 JSON Schema 参数的 `*.network.json` | [`public/.well-known/lifelens.network.json`](public/.well-known/lifelens.network.json) |
 | 浏览器端运行时 | [`src/runtime/`](src/runtime/) — manifest 加载、编排器、LLM 客户端 |
 | ≥ 1 个智能体 | 3 个：`front_coordinator`、`data_analyst`、`chart_designer` |
-| 敏感操作确认 | 跨源对等批准确认卡；写入操作需浏览器明确同意 |
+| 清单加载校验 | `manifest.ts` `validateNetwork()`：tools 非空、缺 name、重复 agent 名、front_man 存在性，`loadNetwork` / `loadPeer` 共用，失败即拒绝加载 |
+| 敏感操作确认 | 跨源对等批准确认卡、站点动作确认卡（确认后按钮 loading、成败 toast）；写入操作需浏览器明确同意 |
+| 站点动作（grounded capability） | `export_analysis`：导出 PNG 图表 / Markdown 分析报告到本地，确认后才执行 |
+| 执行结果可观察 | 聊天内 trace 卡片：委派链 + 参数摘要 + 每次网络请求耗时 + 总耗时；trace 不输出 Key 等凭证 |
 | 产物不含凭证 | `.env.production` 强制空 Key，产物经扫描验证 |
 | 跨站委派 | `peer-link` + `peer-policy`；批准后才加载对端 manifest |
 
@@ -112,7 +117,7 @@ VITE_LLM_MODEL=deepseek-chat
 
 在 manifest 的 `peer-link` 里指向任意符合协议站点的 manifest URL，其智能体经用户批准后即可从本站调用（对等智能体会自动暴露为入口 agent 的 `delegate_<name>` 工具）。
 
-- **内置演示**：当前 `peer-link` 指向 `http://localhost:5188`（Health Hub 对等演示站，提供 WHO 健康基准顾问）。该站点为独立目录，未随本仓库分发；启动方式为在其目录下运行 `node server.js`（零依赖静态服务器，带 CORS 头）
+- **内置演示**：当前 `peer-link` 指向 `https://heminhua-pro.github.io/health-hub-peer/`（Health Hub 对等演示站，公网部署，提供 WHO 健康基准顾问；源码为独立目录，MIT 协议，可参考其 `node server.js` 零依赖静态服务器自行部署）
 - **动态接入**：不改动 manifest 也能接——点侧栏「对等站点」旁的 ➕，在弹窗里填站点名 + Manifest URL 即可，走同样的浏览器跨域批准流程
 
 权限模型：对等站点只提供智能体**定义**（instructions + 参数 schema），推理仍走你自己配置的 LLM；数据不出浏览器这条红线不会被对等站点打破。
