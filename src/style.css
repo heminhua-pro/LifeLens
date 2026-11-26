@@ -19,8 +19,8 @@
   --bot-bubble: #ffffff;
   --bot-bubble-grad: linear-gradient(135deg, #ffffff 0%, #fdfdff 55%, #fafdfc 100%);
   --chart-grid: #e6e8f4;
-  --glow-1: rgba(165, 180, 252, 0.4);
-  --glow-2: rgba(153, 246, 228, 0.45);
+  --glow-1: rgba(165, 180, 252, 0.26);
+  --glow-2: rgba(153, 246, 228, 0.28);
   --glow-3: rgba(196, 181, 253, 0.3);
   --shadow: 0 4px 16px rgba(60, 60, 120, 0.08);
   color-scheme: light;
@@ -44,8 +44,8 @@
   --bot-bubble: #1a1d29;
   --bot-bubble-grad: linear-gradient(135deg, #1a1d29 0%, #1e2136 60%, #17222b 100%);
   --chart-grid: #262b3a;
-  --glow-1: rgba(124, 108, 255, 0.14);
-  --glow-2: rgba(34, 211, 238, 0.1);
+  --glow-1: rgba(124, 108, 255, 0.1);
+  --glow-2: rgba(34, 211, 238, 0.07);
   --glow-3: rgba(124, 108, 255, 0.08);
   --shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
   color-scheme: dark;

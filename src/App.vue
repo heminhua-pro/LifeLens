@@ -94,11 +94,11 @@ const antdTheme = computed(() => ({
   z-index: 0;
 }
 .root::before {
-  width: 520px; height: 520px; top: -200px; right: -120px;
+  width: 400px; height: 400px; top: -160px; right: -100px;
   background: radial-gradient(circle, var(--glow-1) 0%, transparent 70%);
 }
 .root::after {
-  width: 480px; height: 480px; bottom: -220px; left: -100px;
+  width: 360px; height: 360px; bottom: -180px; left: -90px;
   background: radial-gradient(circle, var(--glow-2) 0%, transparent 70%);
 }
 .header {
