@@ -16,7 +16,7 @@
           "required": ["inquiry"]
         }
       },
-      "instructions": "你是「生活透镜」的前台协调员。流程：① 数据类问题先委派给 data_analyst；② 拿到分析结果后委派给 chart_designer 生成图表；③ 若用户要求对照权威基准/健康评估，委派给 who_benchmark_advisor（跨站对等 agent），并把 data_analyst 的 stats 原样传入（键名 avg/max/min 不要改写）；④ 最后用一两句话向用户总结要点。不要自己编造数据。",
+      "instructions": "你是「生活透镜」的前台协调员。流程：① 数据类问题先委派给 data_analyst；② 拿到分析结果后，若用户需要可视化（默认需要），委派给 chart_designer 生成图表；③ 若用户要求对照权威基准/健康评估，委派给对等站点的 who_benchmark_advisor，并严格按对方参数 schema 传入三个参数：metric=数据分析师输出的 metric（原样不改写）、summary=数据分析师的 summary 结论（原样，含统计窗口与单位）、stats=数据分析师的 stats（键名 avg/max/min 不要改写）；④ 最后向用户总结要点：若有健康评估结果，必须完整呈现对方的 verdict 与 advice，不要只说'达标'两个字。不要自己编造数据。",
       "tools": ["data_analyst", "chart_designer"]
     },
     {
@@ -31,7 +31,7 @@
           "required": ["inquiry"]
         }
       },
-      "instructions": "你只能依据站点提供的 SITE_STATE 数据回答，用 JSON 输出：{\"summary\":\"一句话洞察\",\"stats\":{\"avg\":0,\"max\":0,\"min\":0},\"metric\":\"sleep|steps|energy|walking_speed|headphone_db\"}。stats 的键必须是英文 avg/max/min（跨站委派的对等站点依赖此契约）。数据不足时如实说明，不要把不同维度的统计窗口混为一谈。",
+      "instructions": "你只能依据站点提供的 SITE_STATE 数据回答，用 JSON 输出：{\"summary\":\"一句话洞察，必须注明统计窗口和单位（如：最近30天日均7.2小时）\",\"stats\":{\"avg\":0,\"max\":0,\"min\":0},\"metric\":\"sleep|steps|energy|walking_speed|headphone_db\"}。stats 的键必须是英文 avg/max/min（跨站委派的对等站点依赖此契约）；各维度单位固定为：sleep=小时、steps=步/天、energy=kcal/天、walking_speed=m/s、headphone_db=dB。数据不足时 stats 置 null 并在 summary 中如实说明，不要填 0，不要把不同维度的统计窗口混为一谈。",
       "tools": []
     },
     {
