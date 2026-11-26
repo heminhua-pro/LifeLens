@@ -10,6 +10,7 @@ import { buildReport } from './runtime/report'
 export interface Msg {
   id: number
   kind: 'user' | 'bot' | 'trace'
+  ts: number
   who?: string
   text?: string
   html?: string
@@ -34,7 +35,7 @@ export const store = reactive({
 })
 
 let nextId = 1
-const pushMsg = (m: Omit<Msg, 'id'>) => { store.messages.push({ id: nextId++, ...m }) }
+const pushMsg = (m: Omit<Msg, 'id' | 'ts'>) => { store.messages.push({ id: nextId++, ts: Date.now(), ...m }) }
 
 /* ---------- 启动：加载 manifest / network ---------- */
 export async function boot() {
@@ -215,7 +216,8 @@ export async function approvePeer(label: string) {
   )
   if (!ok) return
   try {
-    peer.agents = await loadPeer(peer.url)
+    const peerTrace: TraceFn = html => pushMsg({ kind: 'trace', html })
+    peer.agents = await loadPeer(peer.url, peerTrace)
     peer.approved = true
     finishConfirm(true, `已批准跨站加载「${label}」`)
     pushMsg({ kind: 'trace', html: `已批准跨站加载 <b>${label}</b>，可用 agent：${Object.keys(peer.agents).join('、')}` })

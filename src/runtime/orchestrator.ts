@@ -126,7 +126,7 @@ export async function runAgent(
 
   let bubbledChart: ChartResult | null = null
   for (let i = 0; i < 5; i++) {
-    const reply = await callLLM(messages, llmTools, loadCfg())
+    const reply = await callLLM(messages, llmTools, loadCfg(), trace)
     if (reply.tool_calls?.length) {
       messages.push({ role: 'assistant', content: reply.content || '', tool_calls: reply.tool_calls })
       for (const tc of reply.tool_calls) {

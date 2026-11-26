@@ -57,13 +57,24 @@ export async function loadNetwork(manifest: Manifest, manifestUrl?: string): Pro
   return network
 }
 
-/** 对等站点：批准后 fetch 对方 manifest + network，解析出对方 agents */
-export async function loadPeer(peerUrl: string): Promise<Record<string, AgentDef>> {
+/** trace 走 v-html 直出，URL 等动态文本须转义 HTML */
+function esc(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
+/** 对等站点：批准后 fetch 对方 manifest + network，解析出对方 agents（trace 记录每次跨域请求） */
+export async function loadPeer(peerUrl: string, trace?: (html: string) => void): Promise<Record<string, AgentDef>> {
+  const safeUrl = (u: string) => esc(u.replace(/[?#].*$/, '')) // 去掉 query/hash，避免把敏感参数写进 trace
+  let t0 = performance.now()
   const res = await fetch(peerUrl)
+  trace?.(`↗ GET <code>${safeUrl(peerUrl)}</code> → ${res.status}（${Math.round(performance.now() - t0)}ms）`)
   if (!res.ok) throw new Error(`peer manifest 加载失败 (${res.status})`)
   const peerManifest: Manifest = await res.json()
   // hocon 可能是相对路径，必须锚定到对方站点 origin（相对当前页面会错误解析成本站路径）
-  const netRes = await fetch(new URL(peerManifest.hocon, peerUrl).href)
+  const netUrl = new URL(peerManifest.hocon, peerUrl).href
+  t0 = performance.now()
+  const netRes = await fetch(netUrl)
+  trace?.(`↗ GET <code>${safeUrl(netUrl)}</code> → ${netRes.status}（${Math.round(performance.now() - t0)}ms）`)
   if (!netRes.ok) throw new Error(`peer network 加载失败 (${netRes.status})`)
   const peerNetwork: Network = await netRes.json()
   validateNetwork(peerNetwork, peerManifest.front_man)
