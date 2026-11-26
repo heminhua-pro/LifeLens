@@ -25,8 +25,10 @@ export async function loadManifest(): Promise<{ manifest: Manifest; url: string 
  * 不允许直接用页面路径解析——子路径部署（/LifeLens/）下会 404。
  */
 /**
- * network 校验：tools 非空、agent 名称不重复、front_man 必须在 tools 中定义。
+ * network 校验：tools 非空、agent 名称不重复、front_man 存在、下游 agent 引用存在。
  * 校验失败直接抛错，阻止带病清单进入运行时（静默覆盖会掩盖发布错误）。
+ * 注意：跨站 peer agent 不写在 network.json 的 tools 字段里，而是运行时从已批准 peer 动态注入，
+ * 因此这里的引用校验只针对本 network 声明的下游，不会误伤合法的跨站委派。
  */
 export function validateNetwork(network: Network, frontMan?: string): void {
   if (!network.tools?.length) throw new Error('network.tools 为空')
@@ -36,6 +38,14 @@ export function validateNetwork(network: Network, frontMan?: string): void {
   if (dupes.length) throw new Error(`network.tools 存在重复的 agent 名称：${dupes.join('、')}`)
   if (frontMan !== undefined && !names.includes(frontMan))
     throw new Error(`front_man「${frontMan}」未在 network.tools 中定义`)
+  // 校验每个 agent 声明的下游 tools 引用：必须在本 network 中定义（本地悬空引用 = 清单写错）
+  const nameSet = new Set(names)
+  for (const tool of network.tools) {
+    for (const ref of tool.tools || []) {
+      if (!nameSet.has(ref))
+        throw new Error(`agent「${tool.name}」的 tools 引用了未定义的下游 agent「${ref}」`)
+    }
+  }
 }
 
 export async function loadNetwork(manifest: Manifest, manifestUrl?: string): Promise<Network> {

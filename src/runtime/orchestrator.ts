@@ -41,6 +41,18 @@ export interface AgentRunResult {
   chart: ChartResult | null
 }
 
+/** trace 是 v-html 直出：委派参数摘要须转义 HTML，防止 LLM 产物注入标记 */
+function esc(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+/** 委派参数摘要：只用于 trace 展示，截断到 80 字符；trace 不打印 API Key 等机密 */
+function paramSummary(args: Record<string, unknown>): string {
+  try {
+    const s = JSON.stringify(args) || ''
+    return esc(s.length > 80 ? s.slice(0, 80) + '…' : s)
+  } catch { return '(参数序列化失败)' }
+}
+
 /** 站点动作上下文：确认弹窗与实际执行由 store 注入，保持 runtime 与 UI 解耦 */
 export interface ActionContext {
   confirm: (title: string, detail: string) => Promise<boolean>
@@ -149,10 +161,11 @@ export async function runAgent(
         if (!fn.startsWith('delegate_')) continue
         const sub = fn.slice('delegate_'.length)
         if (!agents[sub] && !peerAgents[sub]) continue
-        trace(`委派 <b>${agentName}</b> → <b>${sub}</b>${peerAgents[sub] && !agents[sub] ? '（跨站）' : ''}`)
+        trace(`委派 <b>${agentName}</b> → <b>${sub}</b>${peerAgents[sub] && !agents[sub] ? '（跨站）' : ''}，参数 <code>${paramSummary(args)}</code>`)
         const subResult = await runAgent(agents, peerAgents, sub, args, trace, depth + 1, actions)
         if (subResult.chart) bubbledChart = subResult.chart
         messages.push({ role: 'tool', tool_call_id: tc.id, content: String(subResult.content).slice(0, 4000) })
+        trace(`✓ <b>${sub}</b> 返回（${String(subResult.content).length} 字）`)
       }
       continue
     }

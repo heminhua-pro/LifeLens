@@ -117,6 +117,7 @@ function followUps() {
 }
 .follow-chip:hover { border-color: var(--accent); background: var(--accent-soft); transform: translateY(-1px); }
 .trace { align-self: flex-start; font-size: 12px; color: var(--muted); background: var(--card); border: 1px dashed var(--border); border-radius: 8px; padding: 5px 10px; max-width: 80%; }
+.trace code { font-size: 11px; color: var(--text); opacity: .75; word-break: break-all; }
 .loading-trace { display: inline-flex; align-items: center; gap: 8px; }
 .spinner {
   width: 12px; height: 12px; flex: none;
