@@ -11,14 +11,22 @@ function wellKnownBase(): string {
   return `${base}.well-known/`
 }
 
-export async function loadManifest(): Promise<Manifest> {
-  const res = await fetch(`${wellKnownBase()}agent-manifest.json`)
+export async function loadManifest(): Promise<{ manifest: Manifest; url: string }> {
+  // 锚定到页面实际 URL 解析（GitHub Pages 等子路径部署时 BASE_URL 带 /LifeLens/ 前缀）
+  const url = new URL(`${wellKnownBase()}agent-manifest.json`, location.href).href
+  const res = await fetch(url)
   if (!res.ok) throw new Error(`agent-manifest.json 加载失败 (${res.status})`)
-  return res.json()
+  return { manifest: await res.json(), url }
 }
 
-export async function loadNetwork(manifest: Manifest): Promise<Network> {
-  const res = await fetch(manifest.hocon)
+/**
+ * hocon 按 MVP 规范锚定到 manifest 所在目录（site base）解析：
+ * 相对文件名（如 lifelens.network.json）与绝对 URL 都支持。
+ * 不允许直接用页面路径解析——子路径部署（/LifeLens/）下会 404。
+ */
+export async function loadNetwork(manifest: Manifest, manifestUrl?: string): Promise<Network> {
+  const base = manifestUrl ?? new URL(`${wellKnownBase()}agent-manifest.json`, location.href).href
+  const res = await fetch(new URL(manifest.hocon, base).href)
   if (!res.ok) throw new Error(`network 定义加载失败 (${res.status})`)
   const network: Network = await res.json()
   if (!network.tools?.length) throw new Error('network.tools 为空')

@@ -1,7 +1,7 @@
 {
   "name": "life-lens",
   "front_man": "front_coordinator",
-  "hocon": "/.well-known/lifelens.network.json",
+  "hocon": "lifelens.network.json",
   "peer-link": {
     "health_hub": "http://localhost:5188/.well-known/agent-manifest.json"
   },

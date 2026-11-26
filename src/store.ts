@@ -35,8 +35,9 @@ const pushMsg = (m: Omit<Msg, 'id'>) => { store.messages.push({ id: nextId++, ..
 /* ---------- 启动：加载 manifest / network ---------- */
 export async function boot() {
   try {
-    store.manifest = await loadManifest()
-    const network = await loadNetwork(store.manifest)
+    const { manifest, url } = await loadManifest()
+    store.manifest = manifest
+    const network = await loadNetwork(manifest, url)
     network.tools.forEach(t => (store.agents[t.name] = t))
     store.peers = Object.entries(store.manifest['peer-link'] || {}).map(([label, url]) => ({
       label, url, approved: false
@@ -52,8 +53,8 @@ export async function boot() {
 /** 语言切换后按新语言目录重载 manifest / network（保留已批准的对等站点与聊天记录） */
 export async function reloadForLang() {
   try {
-    const manifest = await loadManifest()
-    const network = await loadNetwork(manifest)
+    const { manifest, url } = await loadManifest()
+    const network = await loadNetwork(manifest, url)
     store.manifest = manifest
     store.agents = {}
     network.tools.forEach(t => (store.agents[t.name] = t))
