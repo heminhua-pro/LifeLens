@@ -96,20 +96,33 @@ function downloadChart() {
   a.click()
 }
 
-/** 导出 Markdown：气泡正文逐字保留 + 顶部内嵌当前图表的 PNG（与页面所见一致） */
+/** 导出 Markdown：气泡正文逐字保留 + 同目录 PNG 图表（相对路径引用，兼容 Typora 等阅读器） */
 function downloadMd() {
   if (!props.mdText && !inst) return
-  // 用当前已渲染实例出图，白底保证在任何 Markdown 阅读器里都清晰
+  // 文件名清理：去掉路径/空白/markdown 干扰字符，保证 md 里的相对路径能正确解析
+  const base = (props.chart.summary || 'analysis')
+    .replace(/[\\/:*?"<>|\s()\[\]{}#%+]+/g, '_')
+    .slice(0, 40) || 'analysis'
+  const pngName = base + '.png'
   const png = inst?.getDataURL({ type: 'png', pixelRatio: 2, backgroundColor: '#ffffff' })
-  const img = png
-    ? `![${props.chart.summary || '趋势图'}](data:image/png;base64,${png.replace(/^data:image\/png;base64,/, '')})\n\n`
-    : ''
+  // data URI 在 Typora 等阅读器里会被当纯文本，改用相对路径引用同目录 PNG
+  const img = png ? `![趋势图](${pngName})\n\n` : ''
   const body = img + (props.mdText || '')
+
+  // 先落地 PNG，再落地 MD（保证同目录、同名对应）
+  if (png) {
+    const pa = document.createElement('a')
+    pa.href = png
+    pa.download = pngName
+    document.body.appendChild(pa)
+    pa.click()
+    pa.remove()
+  }
   const blob = new Blob([body], { type: 'text/markdown;charset=utf-8' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = (props.chart.summary || 'analysis').replace(/[\\/:*?"<>|\s]+/g, '_').slice(0, 40) + '.md'
+  a.download = base + '.md'
   document.body.appendChild(a)
   a.click()
   a.remove()
@@ -140,6 +153,6 @@ onBeforeUnmount(() => {
   padding: 8px; margin-top: 8px; box-shadow: var(--shadow); transition: background .25s ease;
 }
 .chart-summary { font-size: 12px; color: var(--muted); padding: 4px 6px;margin-bottom: 16px; }
-.chart-box { width: 100%; height: 280px; }
+.chart-box { width: 100%; height: 360px; }
 .chart-actions { padding: 4px 6px 2px; }
 </style>
