@@ -28,12 +28,19 @@ function onClear() {
 <template>
   <a-modal
     :open="store.showSettings"
-    :title="t('settingsTitle')"
     @cancel="store.showSettings = false"
     @ok="applySettings(form)"
     :ok-text="t('btnSave')"
     :cancel-text="t('btnCancel')"
   >
+    <template #title>
+      <span class="title-row">
+        {{ t('settingsTitle') }}
+        <a-popconfirm :title="t('clearCfgTip')" @confirm="onClear">
+          <a-button danger size="small">{{ t('btnClearCfg') }}</a-button>
+        </a-popconfirm>
+      </span>
+    </template>
     <div class="field-label">{{ t('fieldBase') }}</div>
     <a-input v-model:value="form.base" :placeholder="apiHint" />
     <div class="field-label">{{ t('fieldKey') }}</div>
@@ -41,16 +48,11 @@ function onClear() {
     <div class="field-label">{{ t('fieldModel') }}</div>
     <a-input v-model:value="form.model" placeholder="deepseek-chat / gpt-4o-mini / ..." />
     <div class="tip">{{ t('settingsTip') }}</div>
-    <div class="danger-row">
-      <a-popconfirm :title="t('clearCfgTip')" @confirm="onClear">
-        <a-button danger size="small">{{ t('btnClearCfg') }}</a-button>
-      </a-popconfirm>
-    </div>
   </a-modal>
 </template>
 
 <style scoped>
 .field-label { font-size: 12px; color: var(--muted); margin: 10px 0 4px; }
 .tip { font-size: 12px; color: var(--muted); margin-top: 10px; line-height: 1.6; }
-.danger-row { margin-top: 14px; border-top: 1px solid var(--muted); padding-top: 12px; }
+.title-row { display: flex; align-items: center; gap: 10px; }
 </style>

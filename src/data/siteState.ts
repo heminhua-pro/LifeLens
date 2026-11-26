@@ -26,11 +26,11 @@ function fit(pts: Pt[], pick: (d: Pt) => number | undefined): Fit {
   if (!clean.length) return { values: [], dates: [], range: '无数据', sampled: '', rawCount: 0 }
   const range = `${clean[0].date} ~ ${clean[clean.length - 1].date}`
   if (clean.length <= MAX_POINTS)
-    return { values: clean.map(pick), dates: clean.map(d => d.date), range, sampled: '', rawCount: clean.length }
+    return { values: clean.map(d => pick(d) as number), dates: clean.map(d => d.date), range, sampled: '', rawCount: clean.length }
   const stride = Math.ceil(clean.length / MAX_POINTS)
   const kept = clean.filter((_, i) => i % stride === 0)
   return {
-    values: kept.map(pick),
+    values: kept.map(d => pick(d) as number),
     dates: kept.map(d => d.date),
     range,
     sampled: `原始共 ${clean.length} 天，为控制上下文体积按每 ${stride} 天取样展示`,
